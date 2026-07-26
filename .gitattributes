@@ -1,0 +1,21 @@
+# Normalize all text files to LF in the repo and on checkout.
+# This plugin is deployed to Linux servers and packaged into ZIPs, so
+# line endings must stay LF regardless of the committer's OS.
+* text=auto eol=lf
+
+# Binary assets: never touch line endings.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text eol=lf
+*.zip binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+
+# Files that don't belong in a distributed release archive.
+/.gitattributes export-ignore
+/.gitignore export-ignore
