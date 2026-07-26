@@ -1,0 +1,38 @@
+{
+    "name": "baeumi/order-splitting",
+    "description": "Order Splitting - ship line items of a single order to multiple delivery addresses.",
+    "version": "1.0.0",
+    "type": "shopware-platform-plugin",
+    "license": "MIT",
+    "keywords": [
+        "shopware",
+        "shopware6",
+        "order",
+        "split",
+        "delivery",
+        "multiple-addresses",
+        "checkout"
+    ],
+    "authors": [
+        { "name": "Baeumi" }
+    ],
+    "require": {
+        "shopware/core": "~6.7.0"
+    },
+    "extra": {
+        "shopware-plugin-class": "Baeumi\\OrderSplitting\\OrderSplitting",
+        "label": {
+            "en-GB": "Order Splitting",
+            "de-DE": "Bestellung aufteilen"
+        },
+        "description": {
+            "en-GB": "Let customers ship items of one order to several delivery addresses.",
+            "de-DE": "Kunden koennen Artikel einer Bestellung an mehrere Lieferadressen senden."
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Baeumi\\OrderSplitting\\": "src/"
+        }
+    }
+}

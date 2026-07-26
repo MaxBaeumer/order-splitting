@@ -1,0 +1,25 @@
+{
+  "base": "/bundles/ordersplitting/administration/",
+  "entryPoints": {
+    "order-splitting": {
+      "css": [
+        "/bundles/ordersplitting/administration/assets/order-splitting-Ca3CqtCO.css"
+      ],
+      "dynamic": [],
+      "js": [
+        "/bundles/ordersplitting/administration/assets/order-splitting-BezIH21a.js"
+      ],
+      "legacy": false,
+      "preload": []
+    }
+  },
+  "legacy": false,
+  "metadatas": {},
+  "version": [
+    "7.1.0",
+    7,
+    1,
+    0
+  ],
+  "viteServer": null
+}

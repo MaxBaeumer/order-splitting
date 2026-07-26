@@ -1,0 +1,116 @@
+{% sw_extends '@Storefront/storefront/page/checkout/_page.html.twig' %}
+
+{% block page_checkout_main_content %}
+    {% set shippingMethodData = [] %}
+    {% for method in page.shippingMethods %}
+        {% set shippingMethodData = shippingMethodData|merge([{
+            id: method.id,
+            name: method.translated.name ?? method.name
+        }]) %}
+    {% endfor %}
+
+    <div class="checkout-main order-split"
+         data-order-split="true"
+         data-recalculate-url="{{ path('frontend.checkout.split.recalculate') }}"
+         data-shipping-methods="{{ shippingMethodData|json_encode }}"
+         data-selected-methods="{{ page.assignment.methods|json_encode }}">
+
+        <h1 class="checkout-split-headline">
+            {{ "order-splitting.headline"|trans }}
+        </h1>
+
+        <p class="checkout-split-intro">
+            {{ "order-splitting.intro"|trans }}
+        </p>
+
+        <form action="{{ path('frontend.checkout.split.save') }}"
+              method="post"
+              data-form-csrf-handler="true"
+              class="order-split-form">
+
+            {% set addresses = page.addresses %}
+            {% set assignment = page.assignment.assignments %}
+
+            {% for lineItem in page.cart.lineItems %}
+                {% if lineItem.deliveryInformation %}
+                    {% set itemAssignment = assignment[lineItem.id] ?? {} %}
+
+                    <div class="card order-split-item mb-3"
+                         data-line-item-id="{{ lineItem.id }}"
+                         data-total-quantity="{{ lineItem.quantity }}">
+                        <div class="card-body">
+                            <div class="order-split-item-header">
+                                <strong>{{ lineItem.label }}</strong>
+                                <span class="order-split-item-qty">
+                                    {{ "order-splitting.totalQuantity"|trans }}: {{ lineItem.quantity }}
+                                </span>
+                            </div>
+
+                            <div class="order-split-rows">
+                                {# One row = one address + quantity. Prefill from saved assignment. #}
+                                {% if itemAssignment is not empty %}
+                                    {% for addressId, qty in itemAssignment %}
+                                        {% sw_include '@OrderSplitting/storefront/page/checkout/split/_row.html.twig' with {
+                                            lineItem: lineItem,
+                                            addresses: addresses,
+                                            selectedAddressId: addressId,
+                                            quantity: qty
+                                        } %}
+                                    {% endfor %}
+                                {% else %}
+                                    {% sw_include '@OrderSplitting/storefront/page/checkout/split/_row.html.twig' with {
+                                        lineItem: lineItem,
+                                        addresses: addresses,
+                                        selectedAddressId: null,
+                                        quantity: lineItem.quantity
+                                    } %}
+                                {% endif %}
+                            </div>
+
+                            <button type="button"
+                                    class="btn btn-link order-split-add-row"
+                                    data-line-item-id="{{ lineItem.id }}">
+                                + {{ "order-splitting.addAddress"|trans }}
+                            </button>
+
+                            <div class="order-split-item-error invalid-feedback d-block"
+                                 data-error-for="{{ lineItem.id }}"></div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            {# Shipping method per delivery address. Populated by the JS plugin
+               from the distinct addresses currently selected above; each entry
+               becomes a hidden method[<addressId>] field on submit. Without JS
+               the deliveries fall back to the cart's default shipping method. #}
+            <div class="card order-split-methods mb-3" data-order-split-methods>
+                <div class="card-body">
+                    <div class="order-split-methods-header mb-2">
+                        <strong>{{ "order-splitting.methodsHeadline"|trans }}</strong>
+                    </div>
+                    <div class="order-split-methods-list"></div>
+                    <p class="order-split-methods-empty text-muted mb-0">
+                        {{ "order-splitting.methodsEmpty"|trans }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="order-split-actions d-flex justify-content-between">
+                <a href="{{ path('frontend.checkout.cart.page') }}" class="btn btn-light">
+                    {{ "order-splitting.backToCart"|trans }}
+                </a>
+                <button type="submit" class="btn btn-primary order-split-submit">
+                    {{ "order-splitting.continue"|trans }}
+                </button>
+            </div>
+        </form>
+
+        <p class="order-split-newaddress-hint mt-3">
+            {{ "order-splitting.newAddressHint"|trans }}
+            <a href="{{ path('frontend.account.address.create.page') }}">
+                {{ "order-splitting.newAddressLink"|trans }}
+            </a>
+        </p>
+    </div>
+{% endblock %}

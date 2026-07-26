@@ -1,0 +1,25 @@
+{% sw_extends '@Storefront/storefront/page/account/order-history/order-item.html.twig' %}
+
+{#
+    Add a "Split order" badge next to the order status in the collapsed order
+    row so a split order is recognisable at a glance in the order history,
+    without expanding the detail. An order is considered split when it has more
+    than one delivery (i.e. it was shipped to multiple addresses). The delivery
+    associations are loaded via AccountOrderPageSubscriber.
+#}
+
+{% block page_account_order_item_status %}
+    {{ parent() }}
+
+    {% if order.deliveries|length > 1 %}
+        {% block page_account_order_item_status_split_badge %}
+            <div class="order-table-header-order-status order-split-status">
+                <span class="badge badge-lg order-item-status-badge order-split-badge bg-info text-white"
+                      title="{{ 'order-splitting.account.hint'|trans({ '%count%': order.deliveries|length })|striptags }}">
+                    {% sw_icon 'truck' style { size: 'sm' } %}
+                    {{ 'order-splitting.account.badge'|trans|sw_sanitize }}
+                </span>
+            </div>
+        {% endblock %}
+    {% endif %}
+{% endblock %}

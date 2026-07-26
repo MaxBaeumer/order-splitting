@@ -1,0 +1,105 @@
+{% block swag_order_split_modal %}
+<sw-modal
+    class="swag-order-split-modal"
+    :title="$tc('swag-order-splitting-split-modal.title')"
+    variant="large"
+    @modal-close="onCancel"
+>
+    {% block swag_order_split_modal_content %}
+    <sw-loader v-if="isLoading" />
+
+    <template v-else>
+        <p class="swag-order-split-modal__intro">
+            {{ $tc('swag-order-splitting-split-modal.intro') }}
+        </p>
+
+        {% block swag_order_split_modal_items %}
+        <div
+            v-for="item in deliverableItems"
+            :key="item.id"
+            class="swag-order-split-modal__item"
+        >
+            <div class="swag-order-split-modal__item-header">
+                <strong>{{ item.label }}</strong>
+                <span class="swag-order-split-modal__item-qty">
+                    {{ $tc('swag-order-splitting-split-modal.totalQuantity') }}: {{ item.quantity }}
+                </span>
+            </div>
+
+            <div
+                v-for="(row, index) in rows[item.id]"
+                :key="index"
+                class="swag-order-split-modal__row"
+            >
+                <sw-single-select
+                    class="swag-order-split-modal__row-address"
+                    v-model:value="row.addressId"
+                    :options="addressOptions"
+                    :placeholder="$tc('swag-order-splitting-split-modal.chooseAddress')"
+                />
+                <sw-number-field
+                    class="swag-order-split-modal__row-qty"
+                    v-model:value="row.quantity"
+                    :min="1"
+                    number-type="int"
+                />
+                <mt-button
+                    class="swag-order-split-modal__row-remove"
+                    variant="critical"
+                    ghost
+                    size="small"
+                    :disabled="rows[item.id].length <= 1"
+                    @click="removeRow(item.id, index)"
+                >
+                    {{ $tc('swag-order-splitting-split-modal.remove') }}
+                </mt-button>
+            </div>
+
+            <p v-if="itemError(item)" class="swag-order-split-modal__error">
+                {{ itemError(item) }}
+            </p>
+
+            <mt-button variant="secondary" size="small" @click="addRow(item.id)">
+                {{ $tc('swag-order-splitting-split-modal.addAddress') }}
+            </mt-button>
+        </div>
+        {% endblock %}
+
+        {% block swag_order_split_modal_methods %}
+        <div v-if="distinctAddressIds.length" class="swag-order-split-modal__methods">
+            <h4>{{ $tc('swag-order-splitting-split-modal.methodsHeadline') }}</h4>
+            <div
+                v-for="addressId in distinctAddressIds"
+                :key="addressId"
+                class="swag-order-split-modal__method-row"
+            >
+                <span class="swag-order-split-modal__method-address">{{ addressLabelById(addressId) }}</span>
+                <sw-single-select
+                    class="swag-order-split-modal__method-select"
+                    v-model:value="methodChoices[addressId]"
+                    :options="methodOptions"
+                    :placeholder="$tc('swag-order-splitting-split-modal.chooseMethod')"
+                />
+            </div>
+        </div>
+        {% endblock %}
+    </template>
+    {% endblock %}
+
+    {% block swag_order_split_modal_footer %}
+    <template #modal-footer>
+        <mt-button variant="secondary" @click="onCancel">
+            {{ $tc('global.default.cancel') }}
+        </mt-button>
+        <mt-button
+            variant="primary"
+            :is-loading="isSaving"
+            :disabled="!isValid || isSaving"
+            @click="onSave"
+        >
+            {{ $tc('swag-order-splitting-split-modal.apply') }}
+        </mt-button>
+    </template>
+    {% endblock %}
+</sw-modal>
+{% endblock %}

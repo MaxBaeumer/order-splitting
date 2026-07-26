@@ -1,0 +1,101 @@
+{% sw_extends '@Storefront/storefront/page/checkout/confirm/confirm-address.html.twig' %}
+
+{#
+    When an order split is active, the buyer has routed line items to several
+    delivery addresses. The core confirm page only renders the single default
+    shipping address, which is misleading in that case. We therefore replace the
+    shipping-address element with a per-delivery summary built from
+    page.cart.deliveries (each address becomes one Delivery, see
+    OrderSplitProcessor). When no split is active we fall back to the core
+    output via parent().
+
+    The split is detected through the SplitAssignmentStruct cart extension
+    (EXTENSION_KEY = 'orderSplitAssignment'); isActive() is true only when more
+    than one distinct address is used.
+#}
+
+{% block page_checkout_confirm_address_shipping_title %}
+    {% set orderSplitAssignment = page.cart.extensions.orderSplitAssignment ?? null %}
+    {% if orderSplitAssignment and orderSplitAssignment.active %}
+        <div class="card-title">
+            {{ 'order-splitting.summary.headline'|trans|sw_sanitize }}
+        </div>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
+{% block page_checkout_confirm_address_shipping_data %}
+    {% set orderSplitAssignment = page.cart.extensions.orderSplitAssignment ?? null %}
+    {% if orderSplitAssignment and orderSplitAssignment.active %}
+        <div class="confirm-address-shipping order-split-address-summary">
+            {% for delivery in page.cart.deliveries %}
+                {% set splitLocation = delivery.location %}
+                <div class="order-split-address-summary__delivery{% if not loop.first %} mt-3 pt-3 border-top{% endif %}">
+                    {% block page_checkout_confirm_address_shipping_data_split_heading %}
+                        <div class="order-split-address-summary__heading fw-bold mb-1">
+                            {{ 'order-splitting.summary.delivery'|trans }} {{ loop.index }}
+                        </div>
+                    {% endblock %}
+
+                    {% block page_checkout_confirm_address_shipping_data_split_address %}
+                        {% if splitLocation.address %}
+                            {% sw_include '@Storefront/storefront/component/address/address.html.twig' with {
+                                address: splitLocation.address
+                            } %}
+                        {% elseif splitLocation.country %}
+                            <p class="order-split-address-summary__country">
+                                {{ splitLocation.country.translated.name ?? splitLocation.country.name }}
+                            </p>
+                        {% endif %}
+                    {% endblock %}
+
+                    {% block page_checkout_confirm_address_shipping_data_split_items %}
+                        <ul class="order-split-address-summary__items list-unstyled mt-2 mb-0">
+                            {% for position in delivery.positions %}
+                                <li class="order-split-address-summary__item">
+                                    {{ position.quantity }} &times; {{ position.lineItem.label }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endblock %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
+{% block page_checkout_confirm_address_shipping_actions %}
+    {% set orderSplitAssignment = page.cart.extensions.orderSplitAssignment ?? null %}
+    {% if orderSplitAssignment and orderSplitAssignment.active %}
+        <div class="card-actions">
+            <a href="{{ path('frontend.checkout.split.page') }}"
+               class="btn btn-light order-split-address-summary__edit">
+                {{ 'order-splitting.summary.edit'|trans|sw_sanitize }}
+            </a>
+        </div>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
+{#
+    While a split is active the billing card must not claim "Same as shipping
+    address" (there is no single shipping address anymore). Force the billing
+    address to render in full instead.
+#}
+{% block page_checkout_confirm_address_billing_data %}
+    {% set orderSplitAssignment = page.cart.extensions.orderSplitAssignment ?? null %}
+    {% if orderSplitAssignment and orderSplitAssignment.active %}
+        <div class="confirm-address-billing mb-3">
+            {% set billingAddress = context.customer.activeBillingAddress %}
+            {% sw_include '@Storefront/storefront/component/address/address.html.twig' with {
+                address: billingAddress
+            } %}
+        </div>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}

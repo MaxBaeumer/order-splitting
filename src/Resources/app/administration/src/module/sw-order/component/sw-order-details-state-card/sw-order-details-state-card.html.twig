@@ -1,0 +1,23 @@
+{% block sw_order_detail_state_card_state %}
+    {# Rendered as children of the card's mt-card: the button routes into the
+       card header (headerRight slot); the modal teleports to the body. #}
+    <template #headerRight>
+        <mt-button
+            v-if="showSplitAction"
+            variant="secondary"
+            size="small"
+            @click="showSplitModal = true"
+        >
+            {{ $tc('swag-order-splitting-split-modal.openButton') }}
+        </mt-button>
+    </template>
+
+    <swag-order-split-modal
+        v-if="showSplitModal"
+        :order="order"
+        @modal-close="showSplitModal = false"
+        @split-done="onSplitDone"
+    />
+
+    {% parent %}
+{% endblock %}

@@ -1,0 +1,11 @@
+{
+  "main.js": {
+    "file": "assets/order-splitting-BezIH21a.js",
+    "name": "order-splitting",
+    "src": "main.js",
+    "isEntry": true,
+    "css": [
+      "assets/order-splitting-Ca3CqtCO.css"
+    ]
+  }
+}

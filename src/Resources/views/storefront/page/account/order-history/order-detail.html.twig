@@ -1,0 +1,77 @@
+{% sw_extends '@Storefront/storefront/page/account/order-history/order-detail.html.twig' %}
+
+{#
+    When an order was split across multiple delivery addresses, show a
+    per-delivery summary (address + shipping method + items) inside the expanded
+    order detail, mirroring the checkout confirm/finish pages. Rendered as its
+    own .order-detail-content-body sibling right after the product table body, so
+    no product-table markup is affected. A single delivery keeps the native
+    output untouched.
+
+    deliveries.shippingOrderAddress and deliveries.positions.orderLineItem are
+    loaded via AccountOrderPageSubscriber.
+#}
+
+{% block page_account_order_item_detail_table_body %}
+    {{ parent() }}
+
+    {% if order.deliveries|length > 1 %}
+        {% block page_account_order_item_detail_split_summary %}
+            <div class="order-detail-content-body order-split-account-summary">
+                <div class="row order-detail-content-row">
+                    {% block page_account_order_item_detail_split_summary_title %}
+                        <div class="col-12 card-title order-split-account-summary__title">
+                            {{ 'order-splitting.summary.headline'|trans|sw_sanitize }}
+                        </div>
+                    {% endblock %}
+
+                    {% block page_account_order_item_detail_split_summary_deliveries %}
+                        <div class="col-12">
+                            <div class="row">
+                                {% for delivery in order.deliveries %}
+                                    <div class="col-12 col-md-6 order-split-account-summary__delivery mb-3">
+                                        {% block page_account_order_item_detail_split_summary_heading %}
+                                            <div class="order-split-account-summary__heading fw-bold mb-1">
+                                                {{ 'order-splitting.summary.delivery'|trans }} {{ loop.index }}
+                                            </div>
+                                        {% endblock %}
+
+                                        {% block page_account_order_item_detail_split_summary_address %}
+                                            {% if delivery.shippingOrderAddress %}
+                                                {% sw_include '@Storefront/storefront/component/address/address.html.twig' with {
+                                                    address: delivery.shippingOrderAddress
+                                                } %}
+                                            {% endif %}
+                                        {% endblock %}
+
+                                        {% block page_account_order_item_detail_split_summary_method %}
+                                            {% if delivery.shippingMethod %}
+                                                <div class="order-split-account-summary__method mt-2">
+                                                    <span class="text-muted">{{ 'order-splitting.account.shippingMethodLabel'|trans|sw_sanitize }}:</span>
+                                                    {{ delivery.shippingMethod.translated.name }}
+                                                    {% if delivery.shippingCosts %}
+                                                        &ndash; {{ delivery.shippingCosts.totalPrice|currency(order.currency.isoCode) }}
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        {% endblock %}
+
+                                        {% block page_account_order_item_detail_split_summary_items %}
+                                            <ul class="order-split-account-summary__items list-unstyled mt-2 mb-0">
+                                                {% for position in delivery.positions %}
+                                                    <li class="order-split-account-summary__item">
+                                                        {{ position.quantity }} &times; {{ position.orderLineItem.label ?? position.orderLineItemId }}
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endblock %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endblock %}
+                </div>
+            </div>
+        {% endblock %}
+    {% endif %}
+{% endblock %}

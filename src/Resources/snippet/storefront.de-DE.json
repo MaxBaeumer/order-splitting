@@ -1,0 +1,30 @@
+{
+    "order-splitting": {
+        "headline": "An mehrere Adressen senden",
+        "intro": "Verteilen Sie die Menge jedes Produkts auf eine oder mehrere Ihrer gespeicherten Lieferadressen. Jede Adresse wird zu einer eigenen Lieferung.",
+        "totalQuantity": "Gesamtmenge",
+        "chooseAddress": "Adresse waehlen",
+        "addAddress": "Weitere Adresse hinzufuegen",
+        "remove": "Entfernen",
+        "backToCart": "Zurueck zum Warenkorb",
+        "continue": "Weiter zur Bestaetigung",
+        "saved": "Ihre Lieferaufteilung wurde gespeichert.",
+        "newAddressHint": "Benoetigen Sie eine neue Lieferadresse?",
+        "newAddressLink": "Adresse im Konto hinzufuegen",
+        "confirmEntry": "Moechten Sie Artikel an verschiedene Adressen senden?",
+        "confirmEntryButton": "Bestellung aufteilen",
+        "notAvailable": "Das Aufteilen dieser Bestellung ist nicht verfuegbar.",
+        "methodsHeadline": "Versandart je Lieferadresse",
+        "methodsEmpty": "Weisen Sie oben Produkte zu Adressen zu, um je Lieferung eine Versandart zu waehlen.",
+        "summary": {
+            "headline": "Lieferadressen",
+            "delivery": "Lieferung",
+            "edit": "Aufteilung aendern"
+        },
+        "account": {
+            "badge": "Aufgeteilte Bestellung",
+            "hint": "Diese Bestellung wurde an %count% Lieferadressen versendet.",
+            "shippingMethodLabel": "Versandart"
+        }
+    }
+}

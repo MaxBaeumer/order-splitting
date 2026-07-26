@@ -1,0 +1,27 @@
+# Dependencies
+/vendor/
+node_modules/
+
+# Composer lock is not committed for a distributable plugin (library)
+composer.lock
+
+# Build / tooling caches
+.phpunit.result.cache
+*.cache
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# NOTE: compiled admin/storefront assets under
+# src/Resources/public/ and src/Resources/app/storefront/dist/ are
+# intentionally committed - they are required for the plugin to run
+# without a build step after install.

@@ -1,0 +1,35 @@
+{# A single address + quantity row. These inputs are UI-only (no name attr);
+   the JS plugin serialises them into hidden fields shaped
+   assignment[<lineItemId>][<addressId>] = <qty> right before submit. #}
+<div class="order-split-row row align-items-center mb-2">
+    <div class="col-8">
+        <select class="form-select order-split-address"
+                data-line-item-id="{{ lineItem.id }}"
+                required>
+            <option value="" disabled {{ selectedAddressId is null ? 'selected' : '' }}>
+                {{ "order-splitting.chooseAddress"|trans }}
+            </option>
+            {% for address in addresses %}
+                <option value="{{ address.id }}" {{ address.id == selectedAddressId ? 'selected' : '' }}>
+                    {{ address.firstName }} {{ address.lastName }},
+                    {{ address.street }}, {{ address.zipcode }} {{ address.city }}
+                    {% if address.country %}({{ address.country.translated.name }}){% endif %}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-3">
+        <input type="number"
+               min="1"
+               step="1"
+               value="{{ quantity }}"
+               class="form-control order-split-quantity"
+               data-line-item-id="{{ lineItem.id }}"
+               data-qty-input="true"/>
+    </div>
+    <div class="col-1">
+        <button type="button" class="btn btn-link text-danger order-split-remove-row" title="{{ "order-splitting.remove"|trans }}">
+            &times;
+        </button>
+    </div>
+</div>

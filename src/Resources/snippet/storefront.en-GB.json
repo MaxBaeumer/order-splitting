@@ -1,0 +1,30 @@
+{
+    "order-splitting": {
+        "headline": "Ship to multiple addresses",
+        "intro": "Assign the quantities of each product to one or more of your saved delivery addresses. Each address becomes a separate delivery.",
+        "totalQuantity": "Total quantity",
+        "chooseAddress": "Choose an address",
+        "addAddress": "Add another address",
+        "remove": "Remove",
+        "backToCart": "Back to cart",
+        "continue": "Continue to confirmation",
+        "saved": "Your delivery split has been saved.",
+        "newAddressHint": "Need a new delivery address?",
+        "newAddressLink": "Add an address to your account",
+        "confirmEntry": "Want to ship items to different addresses?",
+        "confirmEntryButton": "Split this order",
+        "notAvailable": "Splitting this order is not available.",
+        "methodsHeadline": "Shipping method per delivery address",
+        "methodsEmpty": "Assign products to addresses above to choose a shipping method for each delivery.",
+        "summary": {
+            "headline": "Shipping addresses",
+            "delivery": "Delivery",
+            "edit": "Change delivery split"
+        },
+        "account": {
+            "badge": "Split order",
+            "hint": "This order was shipped to %count% delivery addresses.",
+            "shippingMethodLabel": "Shipping method"
+        }
+    }
+}

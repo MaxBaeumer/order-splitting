@@ -1,0 +1,37 @@
+.swag-order-split-delivery-card {
+    margin-bottom: 24px;
+
+    &__col--left {
+        padding-right: 24px;
+    }
+
+    &__address {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin: 0 0 16px;
+    }
+
+    &__items-headline {
+        margin: 0 0 4px;
+        font-weight: 700;
+    }
+
+    &__items {
+        margin: 0 0 8px;
+        padding-left: 18px;
+    }
+
+    &__product-number {
+        margin-left: 4px;
+        color: var(--color-text-secondary, #52667a);
+    }
+
+    &__shipping {
+        margin: 0 0 16px;
+    }
+
+    &__label {
+        font-weight: 600;
+    }
+}

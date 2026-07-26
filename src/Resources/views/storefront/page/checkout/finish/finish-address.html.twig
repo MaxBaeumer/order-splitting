@@ -1,0 +1,58 @@
+{% sw_extends '@Storefront/storefront/page/checkout/finish/finish-address.html.twig' %}
+
+{#
+    Mirror of the confirm-page shipping summary for the order finish page. Once
+    the order is placed the split lives in native order_delivery rows, so we
+    drive the summary from page.order.deliveries instead of the cart. More than
+    one delivery means the order was shipped to multiple addresses.
+
+    Each delivery's positions (+ orderLineItem) are loaded via
+    FinishPageSubscriber, which adds the association to the finish page order
+    criteria. When there is a single delivery we defer to the core output.
+#}
+
+{% block page_checkout_finish_address_shipping_title %}
+    {% if page.order.deliveries|length > 1 %}
+        <div class="card-title">
+            {{ 'order-splitting.summary.headline'|trans|sw_sanitize }}
+        </div>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
+{% block page_checkout_finish_address_shipping_data %}
+    {% if page.order.deliveries|length > 1 %}
+        <div class="finish-address-shipping order-split-address-summary">
+            {% for delivery in page.order.deliveries %}
+                <div class="order-split-address-summary__delivery{% if not loop.first %} mt-3 pt-3 border-top{% endif %}">
+                    {% block page_checkout_finish_address_shipping_data_split_heading %}
+                        <div class="order-split-address-summary__heading fw-bold mb-1">
+                            {{ 'order-splitting.summary.delivery'|trans }} {{ loop.index }}
+                        </div>
+                    {% endblock %}
+
+                    {% block page_checkout_finish_address_shipping_data_split_address %}
+                        {% if delivery.shippingOrderAddress %}
+                            {% sw_include '@Storefront/storefront/component/address/address.html.twig' with {
+                                address: delivery.shippingOrderAddress
+                            } %}
+                        {% endif %}
+                    {% endblock %}
+
+                    {% block page_checkout_finish_address_shipping_data_split_items %}
+                        <ul class="order-split-address-summary__items list-unstyled mt-2 mb-0">
+                            {% for position in delivery.positions %}
+                                <li class="order-split-address-summary__item">
+                                    {{ position.quantity }} &times; {{ position.orderLineItem.label ?? position.orderLineItemId }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endblock %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}

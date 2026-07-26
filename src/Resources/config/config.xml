@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/platform/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
+
+    <card>
+        <title>Availability</title>
+        <title lang="de-DE">Verfuegbarkeit</title>
+
+        <component name="sw-entity-single-select">
+            <name>availabilityRuleId</name>
+            <entity>rule</entity>
+            <label>Availability rule</label>
+            <label lang="de-DE">Verfuegbarkeitsregel</label>
+            <helpText>If set, "Split this order" is only offered when this Rule Builder rule currently matches (evaluated against the cart/context). Leave empty to make order splitting always available. This config is per sales channel, so you can use a different rule - or none - per channel.</helpText>
+            <helpText lang="de-DE">Wenn gesetzt, wird "Bestellung aufteilen" nur angeboten, wenn diese Rule-Builder-Regel aktuell zutrifft (bezogen auf Warenkorb/Kontext). Leer lassen, damit das Aufteilen immer verfuegbar ist. Diese Einstellung gilt je Verkaufskanal - Sie koennen also je Kanal eine andere Regel oder keine verwenden.</helpText>
+        </component>
+    </card>
+</config>

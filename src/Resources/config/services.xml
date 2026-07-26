@@ -1,0 +1,106 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <!--
+            Collector: loads the CustomerAddress entities referenced by the
+            split into the CartDataCollection so the processor stays DB-free.
+        -->
+        <service id="Baeumi\OrderSplitting\Core\Checkout\Cart\OrderSplitCollector">
+            <argument type="service" id="customer_address.repository"/>
+            <argument type="service" id="shipping_method.repository"/>
+            <tag name="shopware.cart.collector" priority="4500"/>
+        </service>
+
+        <!--
+            Cart processor that rebuilds the cart's delivery collection so that
+            every target address becomes its own Delivery. It MUST run after the
+            core DeliveryProcessor (which builds the single default delivery).
+            Processors run in DESCENDING priority: DeliveryProcessor is -5000 and
+            PromotionDeliveryProcessor is -5100, so -5200 makes us run LAST, when
+            the default delivery already exists. The core Processor then sums the
+            shipping costs of all deliveries into the cart total automatically.
+        -->
+        <service id="Baeumi\OrderSplitting\Core\Checkout\Cart\OrderSplitProcessor">
+            <argument type="service" id="Shopware\Core\Checkout\Cart\Delivery\DeliveryCalculator"/>
+            <tag name="shopware.cart.processor" priority="-5200"/>
+        </service>
+
+        <!-- Reads/writes the assignment struct and recalculates the cart. -->
+        <service id="Baeumi\OrderSplitting\Core\Checkout\Cart\SplitAssignmentService">
+            <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
+            <argument type="service" id="customer_address.repository"/>
+        </service>
+
+        <!-- Decides whether order splitting is available (optional Rule Builder rule). -->
+        <service id="Baeumi\OrderSplitting\Core\Checkout\Cart\OrderSplitAvailabilityService">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <!-- Splits/un-splits a placed order from the admin (order <-> cart round-trip). -->
+        <service id="Baeumi\OrderSplitting\Core\Checkout\Cart\AdminOrderSplitService">
+            <argument type="service" id="order.repository"/>
+            <argument type="service" id="order_delivery.repository"/>
+            <argument type="service" id="customer_address.repository"/>
+            <argument type="service" id="order_tag.repository"/>
+            <argument type="service" id="order_transaction.repository"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\Order\OrderConverter"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\Processor"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\CartRuleLoader"/>
+        </service>
+
+        <!-- Admin-API controller for splitting an order. -->
+        <service id="Baeumi\OrderSplitting\Api\OrderSplitApiController" public="true">
+            <argument type="service" id="Baeumi\OrderSplitting\Core\Checkout\Cart\AdminOrderSplitService"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <!-- Storefront controller for the split step. -->
+        <service id="Baeumi\OrderSplitting\Storefront\Controller\OrderSplitController" public="true">
+            <argument type="service" id="Baeumi\OrderSplitting\Storefront\Page\Split\SplitPageLoader"/>
+            <argument type="service" id="Baeumi\OrderSplitting\Core\Checkout\Cart\SplitAssignmentService"/>
+            <argument type="service" id="Baeumi\OrderSplitting\Core\Checkout\Cart\OrderSplitAvailabilityService"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <!-- Page loader for the split step (loads cart + addresses into a page). -->
+        <service id="Baeumi\OrderSplitting\Storefront\Page\Split\SplitPageLoader">
+            <argument type="service" id="Shopware\Storefront\Page\GenericPageLoader"/>
+            <argument type="service" id="Shopware\Core\Checkout\Cart\SalesChannel\CartService"/>
+            <argument type="service" id="customer_address.repository"/>
+            <argument type="service" id="Shopware\Core\Checkout\Shipping\SalesChannel\ShippingMethodRoute"/>
+            <argument type="service" id="Symfony\Component\EventDispatcher\EventDispatcherInterface"/>
+        </service>
+
+        <!--
+            Adds the deliveries.positions.orderLineItem association to the finish
+            page order criteria so the split summary can list the items routed to
+            each delivery address after the order is placed.
+        -->
+        <service id="Baeumi\OrderSplitting\Storefront\Subscriber\FinishPageSubscriber">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!--
+            Adds the deliveries.shippingOrderAddress + deliveries.positions
+            associations to the customer account order history criteria so the
+            order overview can indicate (and summarise) split orders.
+        -->
+        <service id="Baeumi\OrderSplitting\Storefront\Subscriber\AccountOrderPageSubscriber">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!--
+            Rule Builder condition matching on the number of distinct delivery
+            addresses of an order. Use it in a Flow ("order placed" -> condition
+            -> add tag) to tag split orders for filtering in the admin.
+        -->
+        <service id="Baeumi\OrderSplitting\Core\Rule\OrderDeliveryAddressCountRule">
+            <tag name="shopware.rule.definition"/>
+        </service>
+    </services>
+</container>

@@ -1,0 +1,33 @@
+{% block swag_order_splitting_settings %}
+<sw-page class="swag-order-splitting-settings">
+    {% block swag_order_splitting_settings_smart_bar_header %}
+    <template #smart-bar-header>
+        <h2>{{ $tc('swag-order-splitting-settings.title') }}</h2>
+    </template>
+    {% endblock %}
+
+    {% block swag_order_splitting_settings_smart_bar_actions %}
+    <template #smart-bar-actions>
+        <mt-button
+            variant="primary"
+            :is-loading="isLoading"
+            @click="onSave"
+        >
+            {{ $tc('global.default.save') }}
+        </mt-button>
+    </template>
+    {% endblock %}
+
+    {% block swag_order_splitting_settings_content %}
+    <template #content>
+        <sw-card-view>
+            <sw-system-config
+                ref="systemConfig"
+                sales-channel-switchable
+                domain="OrderSplitting.config"
+            />
+        </sw-card-view>
+    </template>
+    {% endblock %}
+</sw-page>
+{% endblock %}

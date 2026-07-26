@@ -1,0 +1,84 @@
+{# Split orders: replace the single, primary-delivery-only shipping card with one
+   interactive card per delivery. Each card reuses the native
+   sw-order-details-state-card (delivery state + state-change modal + history)
+   and adds an editable tracking-code field, plus a read-only address, item list
+   and shipping summary. Single-delivery orders keep the core card via parent. #}
+{% block sw_order_detail_details_shipping %}
+    <template v-if="!isSplitOrder">
+        {% parent %}
+    </template>
+
+    <template v-else>
+        <sw-order-details-state-card
+            v-for="(splitDelivery, splitIndex) in splitDeliveries"
+            :key="splitDelivery.id"
+            position="delivery"
+            :title="$tc('swag-order-splitting.card.delivery') + ' ' + (splitIndex + 1)"
+            :order="order"
+            :entity="splitDelivery"
+            :state-label="$t('sw-order.stateCard.headlineDeliveryState')"
+            :disabled="!acl.can('order.editor') || undefined"
+            class="swag-order-split-delivery-card"
+            @show-status-history="showStateHistoryModal = true"
+            @save-edits="onSaveEdits"
+        >
+            {% block swag_order_split_delivery_card_left %}
+            <div class="swag-order-split-delivery-card__col swag-order-split-delivery-card__col--left">
+                <p class="swag-order-split-delivery-card__address">
+                    <mt-icon name="regular-map-marker" size="14px" />
+                    {{ splitAddressLine(splitDelivery) }}
+                </p>
+
+                <p class="swag-order-split-delivery-card__items-headline">
+                    {{ $tc('swag-order-splitting.card.itemsHeadline') }}
+                </p>
+                <ul class="swag-order-split-delivery-card__items">
+                    <li v-for="position in splitPositions(splitDelivery)" :key="position.id">
+                        {{ position.quantity }} &times;
+                        <router-link
+                            v-if="splitProductId(position)"
+                            :to="{ name: 'sw.product.detail', params: { id: splitProductId(position) } }"
+                            class="swag-order-split-delivery-card__product-link"
+                        >
+                            {{ splitLineItemLabel(position) }}
+                        </router-link>
+                        <template v-else>{{ splitLineItemLabel(position) }}</template>
+                        <span
+                            v-if="splitProductNumber(position)"
+                            class="swag-order-split-delivery-card__product-number"
+                        >({{ splitProductNumber(position) }})</span>
+                    </li>
+                </ul>
+            </div>
+            {% endblock %}
+
+            {% block swag_order_split_delivery_card_right %}
+            <div class="swag-order-split-delivery-card__col swag-order-split-delivery-card__col--right">
+                <p class="swag-order-split-delivery-card__shipping">
+                    <span class="swag-order-split-delivery-card__label">
+                        {{ $tc('swag-order-splitting.card.shipping') }}:
+                    </span>
+                    {{ splitShippingMethodName(splitDelivery) }} &middot; {{ splitFormattedShippingCost(splitDelivery) }}
+                </p>
+
+                <sw-multi-tag-select
+                    v-model:value="splitDelivery.trackingCodes"
+                    class="swag-order-split-delivery-card__tracking"
+                    :disabled="!acl.can('order.editor') || undefined"
+                    :placeholder="$t('sw-order.detailBase.placeholderTrackingCodeSelect')"
+                    :label="$t('sw-order.detailBase.labelTrackingCodes')"
+                    :validate="(term) => validateSplitTrackingCode(splitDelivery, term)"
+                    @update:value="saveAndReload"
+                >
+                    <template #message-add-data>
+                        <span>{{ $t('sw-order.detailBase.addTrackingCode') }}</span>
+                    </template>
+                    <template #message-enter-valid-data>
+                        <span>{{ $t('sw-order.detailBase.enterValidTrackingCode') }}</span>
+                    </template>
+                </sw-multi-tag-select>
+            </div>
+            {% endblock %}
+        </sw-order-details-state-card>
+    </template>
+{% endblock %}

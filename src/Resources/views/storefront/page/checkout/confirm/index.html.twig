@@ -1,0 +1,20 @@
+{% sw_extends '@Storefront/storefront/page/checkout/confirm/index.html.twig' %}
+
+{# Insert an entry point to the split step above the confirm address block.
+   This is the least invasive way to add a "new step before confirm": the
+   customer reaches confirm as usual and can branch into the split UI. #}
+{% block page_checkout_confirm_address %}
+    {# Availability: only offer the split when no availability rule is configured,
+       or the configured rule currently matches. Shopware pre-computes matching
+       rule ids into context.ruleIds, so this is a plain membership check. #}
+    {% set orderSplitAvailabilityRule = config('OrderSplitting.config.availabilityRuleId') %}
+    {% if not orderSplitAvailabilityRule or orderSplitAvailabilityRule in context.ruleIds %}
+        <div class="order-split-entry alert alert-info d-flex justify-content-between align-items-center">
+            <span>{{ "order-splitting.confirmEntry"|trans }}</span>
+            <a href="{{ path('frontend.checkout.split.page') }}" class="btn btn-outline-primary btn-sm">
+                {{ "order-splitting.confirmEntryButton"|trans }}
+            </a>
+        </div>
+    {% endif %}
+    {{ parent() }}
+{% endblock %}
