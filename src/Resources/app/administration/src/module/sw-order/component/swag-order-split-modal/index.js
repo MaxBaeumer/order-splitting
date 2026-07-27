@@ -138,11 +138,73 @@ Shopware.Component.register('swag-order-split-modal', {
 
         initRows() {
             const rows = {};
+            const methodChoices = { ...this.methodChoices };
             const defaultAddress = this.addresses.length ? this.addresses[0].id : null;
+
+            // Reconstruct the CURRENT split from the order's existing deliveries
+            // so re-opening the modal on an (already split) order shows how the
+            // order is configured now, instead of resetting to a single address.
+            // Deliveries store an order_address SNAPSHOT, not the customer_address
+            // the dropdown uses, so match each back to the address book by content.
+            const assignedByItem = {}; // lineItemId => { customerAddressId => quantity }
+            (this.order.deliveries ?? []).forEach((delivery) => {
+                const orderAddress = delivery.shippingOrderAddress;
+                const addressId = orderAddress ? this.matchCustomerAddressId(orderAddress) : null;
+                if (!addressId) {
+                    return;
+                }
+
+                // Pre-select the delivery's shipping method (if still available).
+                if (delivery.shippingMethodId
+                    && !methodChoices[addressId]
+                    && this.shippingMethods.some((method) => method.id === delivery.shippingMethodId)) {
+                    methodChoices[addressId] = delivery.shippingMethodId;
+                }
+
+                (delivery.positions ?? []).forEach((position) => {
+                    const lineItemId = position.orderLineItemId;
+                    const quantity = Number(position.quantity) || 0;
+                    if (!lineItemId || quantity <= 0) {
+                        return;
+                    }
+                    assignedByItem[lineItemId] = assignedByItem[lineItemId] ?? {};
+                    assignedByItem[lineItemId][addressId] = (assignedByItem[lineItemId][addressId] ?? 0) + quantity;
+                });
+            });
+
             this.deliverableItems.forEach((item) => {
+                const assigned = assignedByItem[item.id];
+                // Only trust the reconstruction when it fully accounts for the
+                // item's quantity (e.g. every referenced address still exists in
+                // the book). Otherwise fall back to a single default row so the
+                // modal always opens in a valid state.
+                if (assigned) {
+                    const entries = Object.entries(assigned);
+                    const sum = entries.reduce((total, [, quantity]) => total + quantity, 0);
+                    if (entries.length && sum === item.quantity) {
+                        rows[item.id] = entries.map(([addressId, quantity]) => ({ addressId, quantity }));
+                        return;
+                    }
+                }
                 rows[item.id] = [{ addressId: defaultAddress, quantity: item.quantity }];
             });
+
             this.rows = rows;
+            this.methodChoices = methodChoices;
+        },
+
+        // Resolve an order_address snapshot back to the matching customer_address
+        // id by comparing the identifying fields (name + street + zip + city).
+        matchCustomerAddressId(orderAddress) {
+            const norm = (value) => (value ?? '').toString().trim().toLowerCase();
+            const match = this.addresses.find((address) => (
+                norm(address.firstName) === norm(orderAddress.firstName)
+                && norm(address.lastName) === norm(orderAddress.lastName)
+                && norm(address.street) === norm(orderAddress.street)
+                && norm(address.zipcode) === norm(orderAddress.zipcode)
+                && norm(address.city) === norm(orderAddress.city)
+            ));
+            return match ? match.id : null;
         },
 
         addRow(lineItemId) {
