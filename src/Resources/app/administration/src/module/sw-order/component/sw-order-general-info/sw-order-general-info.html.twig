@@ -1,59 +1,63 @@
 {# Split orders: the single primary-delivery status select is replaced by a
    read-only list of every delivery's status plus a shortcut to the Details tab
-   (where they can be changed). Single-delivery orders keep the core select. #}
+   (where they can be changed). Single-delivery orders keep the core select.
+   Everything lives in ONE column of the core flex row, with the split / reset
+   actions below the status, so the buttons don't become a stretched column. #}
 {% block sw_order_detail_base_general_info_order_states_shipping %}
-    <template v-if="!splitInfoIsActive">
-        {% parent %}
-    </template>
+    <div class="sw-order-general-info__order-state swag-order-split-general-shipping">
+        <template v-if="!splitInfoIsActive">
+            {% parent %}
+        </template>
 
-    <div
-        v-else
-        class="sw-order-general-info__order-state swag-order-split-general-status"
-    >
-        <span class="swag-order-split-general-status__label">
-            {{ $t('sw-order.stateCard.headlineDeliveryState') }}
-        </span>
+        <div
+            v-else
+            class="swag-order-split-general-status"
+        >
+            <span class="swag-order-split-general-status__label">
+                {{ $t('sw-order.stateCard.headlineDeliveryState') }}
+            </span>
 
-        <ul class="swag-order-split-general-status__list">
-            <li
-                v-for="(splitDelivery, splitIndex) in splitInfoDeliveries"
-                :key="splitDelivery.id"
-                class="swag-order-split-general-status__item"
-            >
-                <span class="swag-order-split-general-status__delivery-label">
-                    {{ $tc('swag-order-splitting.card.delivery') }} {{ splitIndex + 1 }}:
-                </span>
-                <span
-                    class="swag-order-split-general-status__pill"
-                    :style="splitDeliveryPillStyle(splitDelivery)"
+            <ul class="swag-order-split-general-status__list">
+                <li
+                    v-for="(splitDelivery, splitIndex) in splitInfoDeliveries"
+                    :key="splitDelivery.id"
+                    class="swag-order-split-general-status__item"
                 >
-                    {{ splitDelivery.stateMachineState.translated.name }}
-                </span>
-            </li>
-        </ul>
+                    <span class="swag-order-split-general-status__delivery-label">
+                        {{ $tc('swag-order-splitting.card.delivery') }} {{ splitIndex + 1 }}:
+                    </span>
+                    <span
+                        class="swag-order-split-general-status__pill"
+                        :style="splitDeliveryPillStyle(splitDelivery)"
+                    >
+                        {{ splitDelivery.stateMachineState.translated.name }}
+                    </span>
+                </li>
+            </ul>
 
-        <router-link
-            class="swag-order-split-general-status__link"
-            :to="{ name: 'sw.order.detail.details', params: { id: order.id } }"
-        >
-            {{ $tc('swag-order-splitting.general.manageOnDetails') }}
-        </router-link>
-    </div>
+            <router-link
+                class="swag-order-split-general-status__link"
+                :to="{ name: 'sw.order.detail.details', params: { id: order.id } }"
+            >
+                {{ $tc('swag-order-splitting.general.manageOnDetails') }}
+            </router-link>
+        </div>
 
-    {# Split / reset actions, next to the delivery status. #}
-    <div v-if="acl.can('order.editor')" class="swag-order-split-general-actions">
-        <mt-button variant="secondary" size="small" @click="showSplitModal = true">
-            {{ $tc('swag-order-splitting-split-modal.openButton') }}
-        </mt-button>
-        <mt-button
-            v-if="splitInfoIsActive"
-            variant="secondary"
-            size="small"
-            :is-loading="isResetting"
-            @click="onResetSplit"
-        >
-            {{ $tc('swag-order-splitting-split-modal.resetButton') }}
-        </mt-button>
+        {# Split / reset actions, below the delivery status. #}
+        <div v-if="acl.can('order.editor')" class="swag-order-split-general-actions">
+            <mt-button variant="secondary" size="small" @click="showSplitModal = true">
+                {{ $tc('swag-order-splitting-split-modal.openButton') }}
+            </mt-button>
+            <mt-button
+                v-if="splitInfoIsActive"
+                variant="secondary"
+                size="small"
+                :is-loading="isResetting"
+                @click="onResetSplit"
+            >
+                {{ $tc('swag-order-splitting-split-modal.resetButton') }}
+            </mt-button>
+        </div>
     </div>
 
     <swag-order-split-modal

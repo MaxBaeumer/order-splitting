@@ -42,8 +42,29 @@
     }
 }
 
+// Column between payment and order status: content centred in the column,
+// the core delivery select (non-split orders) keeps the full column width.
+.swag-order-split-general-shipping {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    > .sw-order-general-info__order-state {
+        align-self: stretch;
+    }
+}
+
 .swag-order-split-general-actions {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
     gap: 8px;
-    margin-top: 12px;
+    margin-top: 16px;
+    margin-bottom: 24px; // breathing room above the tag field
+
+    .mt-button {
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
 }

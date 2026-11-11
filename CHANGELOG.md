@@ -1,3 +1,10 @@
+# Unreleased
+
+## Administration
+- Order General tab: the "Split order" / "Reset to single delivery" buttons now sit below the delivery status instead of forming a stretched extra column; the delivery-status column is centred between payment and order status, with spacing above the tag field.
+- Verified compatible with Shopware 6.7.15.1 (installed) and 6.7.16.0 (static check).
+- Note: the shipped admin bundle (`order-splitting-SplitBtn2.js` / `order-splitting-SplitBtn3.css`) was patched in place, not rebuilt; run `bin/build-administration.sh` for a clean bundle and source map.
+
 # 1.0.0
 
 Initial release.

@@ -3,11 +3,11 @@
   "entryPoints": {
     "order-splitting": {
       "css": [
-        "/bundles/ordersplitting/administration/assets/order-splitting-BFZxhRCl.css"
+        "/bundles/ordersplitting/administration/assets/order-splitting-SplitBtn3.css"
       ],
       "dynamic": [],
       "js": [
-        "/bundles/ordersplitting/administration/assets/order-splitting-DXfGVHfK.js"
+        "/bundles/ordersplitting/administration/assets/order-splitting-SplitBtn2.js"
       ],
       "legacy": false,
       "preload": []
